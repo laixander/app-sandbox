@@ -27,9 +27,9 @@ const store = useUserStore()
                 color="primary"
                 variant="solid"
                 :loading="store.isLoading"
-                @click="store.deployMockData(6)"
+                @click="store.deployMockData(9)"
               >
-                Deploy 6 Users
+                Deploy 9 Users
               </UButton>
 
               <UButton
@@ -61,7 +61,7 @@ const store = useUserStore()
 
         <div>
           <div v-if="store.isLoading && !store.hasUsers" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <UCard v-for="n in 6" :key="n" class="w-full">
+            <UCard v-for="n in 9" :key="n" class="w-full">
               <div class="flex items-center space-x-4">
                 <USkeleton class="h-12 w-12 rounded-full" />
                 <div class="space-y-2 flex-1">
