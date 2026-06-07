@@ -1,6 +1,6 @@
 # Nuxt 3 + Pinia + NuxtUI Data Seeder
 
-Here is a detailed reference summary of the Nuxt 3 + Pinia + Faker.js + NuxtUI setup with local storage persistence.
+Here is a detailed reference summary of the Nuxt 4 + Pinia + Faker.js + NuxtUI setup with local storage persistence.
 
 ## 🛠️ Tech Stack & Dependencies
 
