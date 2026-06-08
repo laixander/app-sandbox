@@ -1,12 +1,5 @@
 import { faker } from '@faker-js/faker'
-
-export interface User {
-  id: string
-  name: string
-  email: string
-  avatar: string
-  role: string
-}
+import type { User } from '../types/user'
 
 export const SeederService = {
   generateSingleUser(): User {

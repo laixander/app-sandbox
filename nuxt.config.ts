@@ -26,5 +26,16 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
+  },
+
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@faker-js/faker',
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+        'pinia',
+      ]
+    }
   }
 })

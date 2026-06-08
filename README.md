@@ -18,13 +18,16 @@ Here is a detailed reference summary of the Nuxt 4 + Pinia + Faker.js + NuxtUI s
 The application foundation. It hooks the state engines and visual layout wrappers together.
 * **Required Modules**: `'@pinia/nuxt'`, `'@nuxt/ui'`, and `'@pinia-plugin-persistedstate/nuxt'`.
 
-### 2. The Isolated Seeder (`utils/seeder.ts`)
+### 2. Global Types (`types/user.ts`)
+Separates structural TypeScript definitions (like the `User` interface) from pure application logic, ensuring they are globally importable by stores and components without circular dependencies or pulling in logic code.
+
+### 3. The Isolated Seeder (`utils/seeder.ts`)
 This utility keeps mock generation structures clear of UI reactivity or store dispatch operations.
 * **`generateSingleUser()`**: Generates an isolated user footprint complete with a unique UUID, avatar URL, and job description.
 * **`generateUsers(count)`**: Iteratively runs the single-user generation algorithm to build an array payload of size `count`.
 * **`clearUsers()`**: Empties out array allocations during purge requests.
 
-### 3. The State Store Engine (`stores/userStore.ts`)
+### 4. The State Store Engine (`stores/userStore.ts`)
 Handles application business logic, acting as the primary system of record.
 * **State**: Houses the baseline `users` model array alongside an explicit global `isLoading` marker.
 * **Batch Operations**: 
@@ -36,7 +39,7 @@ Handles application business logic, acting as the primary system of record.
   * **Delete** (`deleteUser`): Filters out specific entities by checking their unique IDs, pulling them cleanly from memory.
 * **Persistence Integration**: Specifying `persist: { storage: persistedState.localStorage }` instructs the plugin to capture store mutations instantly, transforming the active state into a persistent stringified browser profile.
 
-### 4. The Multi-View Interface Dashboard (`app.vue`)
+### 5. The Multi-View Interface Dashboard (`app.vue`)
 An interactive dashboard displaying the data through fluid layouts, forms, and context arrays.
 * **Read (Dual Layout Views)**: Accommodates both a multi-column layout for product style views and an dense data presentation engine powered by `<UTable>`. 
 * **Create & Update Engine**: Integrates a structural `<UModal>` layer paired with `<UFormField>` handles. It acts as an agile data entry engine, altering its titles, variables, and behavior configurations depending on whether you are editing an existing item or creating a new one.
