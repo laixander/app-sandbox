@@ -11,7 +11,8 @@ const route = useRoute()
 const items: NavigationMenuItem[][] = [
     [
         { type: 'label', label: 'Menu' },
-        { label: 'Dashboard', icon: 'i-ph-speedometer', to: '/' }
+        { label: 'Dashboard', icon: 'i-lucide-chart-pie', to: '/' },
+        { label: 'CRUD', icon: 'i-lucide-folder-open', to: '/crud' }
     ]
 ]
 

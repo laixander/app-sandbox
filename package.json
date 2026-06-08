@@ -15,9 +15,12 @@
     "@iconify-json/simple-icons": "^1.2.84",
     "@nuxt/ui": "^4.8.1",
     "@pinia-plugin-persistedstate/nuxt": "^1.2.1",
+    "chart.js": "^4.5.1",
     "nuxt": "^4.4.6",
     "pinia": "^3.0.4",
-    "tailwindcss": "^4.3.0"
+    "tailwindcss": "^4.3.0",
+    "vue-chartjs": "^5.3.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.4.0",

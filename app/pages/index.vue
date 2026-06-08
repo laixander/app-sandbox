@@ -1,295 +1,179 @@
 <script setup lang="ts">
+// ============================================================================
+// Page Configuration
+// ============================================================================
 definePageMeta({
-    title: 'NuxtUI',
-    isTable: true,
+    title: 'Dashboard'
 })
 
-import { ref, h, computed } from 'vue'
-import { UAvatar, UBadge, UIcon, UButton, UDropdownMenu } from '#components'
-import { useUserStore } from '~/stores/userStore'
-import { SeederService } from '~/utils/seeder'
-import type { TableColumn, DropdownMenuItem } from '@nuxt/ui'
+// ============================================================================
+// Imports
+// ============================================================================
+import { Line, Bar, Doughnut, Radar, PolarArea } from 'vue-chartjs'
 
-const store = useUserStore()
-const toast = useAppToast()
+// ============================================================================
+// Composables
+// ============================================================================
+const { palette, legendLabels, defaultOptions, doughnutOptions, polarAreaOptions, radarOptions, lineDataset, barDataset, doughnutDataset, polarAreaDataset, radarDataset } = useChart()
 
-type User = typeof store.users[0]
-
-const isOpen = ref(false)
-const isEditing = ref(false)
-const currentUserId = ref<string | null>(null)
-
-const form = ref({
-    name: '',
-    email: '',
-    role: '',
-    avatar: ''
-})
-
-const openCreateModal = () => {
-    isEditing.value = false
-    currentUserId.value = null
-    form.value = {
-        name: '',
-        email: '',
-        role: '',
-        avatar: SeederService.generateSingleUser().avatar
-    }
-    isOpen.value = true
+// ── Line: Single series ───────────────────────────────────────────────────
+const activityData = {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    datasets: [lineDataset({ label: 'Active Users', data: [350, 480, 620, 510, 750, 890, 780] })]
 }
 
-const openEditModal = (user: User) => {
-    isEditing.value = true
-    currentUserId.value = user.id
-    form.value = {
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar
-    }
-    isOpen.value = true
+// ── Line: Multi-series ────────────────────────────────────────────────────
+const revenueData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [
+        lineDataset({ label: 'Revenue', data: [4200, 5800, 5100, 7300, 6800, 9100], borderColor: palette.green.solid, backgroundColor: palette.green.soft }),
+        lineDataset({ label: 'Expenses', data: [3100, 3900, 4200, 4800, 4100, 5300], borderColor: palette.orange.solid, backgroundColor: palette.orange.soft }),
+    ]
 }
 
-const handleSave = () => {
-    if (isEditing.value && currentUserId.value) {
-        // Show confirmation before saving edits
-        isOpen.value = false
-        isEditConfirmOpen.value = true
-    } else {
-        store.createUser({
-            id: crypto.randomUUID(),
-            ...form.value
-        })
-        isOpen.value = false
-        toast.success('User Created', `${form.value.name} has been added.`)
-    }
+// ── Bar: Single series ────────────────────────────────────────────────────
+const completionData = {
+    labels: ['Development', 'Design', 'Marketing', 'Sales', 'Support', 'Operations'],
+    datasets: [barDataset({ label: 'Tasks Completed', data: [320, 150, 90, 210, 180, 250] })]
 }
 
-const confirmSave = () => {
-    if (currentUserId.value) {
-        store.updateUser(currentUserId.value, { ...form.value })
-        toast.success('User Updated', `${form.value.name}'s profile has been saved.`)
-    }
+// ── Bar: Grouped multi-series ─────────────────────────────────────────────
+const groupedBarData = {
+    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+    datasets: [
+        barDataset({ label: 'Current Year', data: [540, 720, 890, 1040], backgroundColor: 'rgba(14, 165, 233, 0.85)', hoverBackgroundColor: 'rgb(14, 165, 233)' }),
+        barDataset({ label: 'Previous Year', data: [410, 620, 750, 870], backgroundColor: 'rgba(156, 163, 175, 0.35)', hoverBackgroundColor: 'rgba(156, 163, 175, 0.6)' }),
+    ]
 }
 
-// Confirmation modals state
-const isDeleteConfirmOpen = ref(false)
-const isEditConfirmOpen = ref(false)
-const pendingDeleteId = ref<string | null>(null)
-
-const promptDelete = (userId: string) => {
-    pendingDeleteId.value = userId
-    isDeleteConfirmOpen.value = true
+// ── Doughnut ──────────────────────────────────────────────────────────────
+const trafficData = {
+    labels: ['Direct', 'Organic', 'Referral', 'Social', 'Email'],
+    datasets: [doughnutDataset({ label: 'Traffic Sources', data: [38, 27, 15, 12, 8] })]
 }
 
-const confirmDelete = () => {
-    if (pendingDeleteId.value) {
-        store.deleteUser(pendingDeleteId.value)
-        toast.error('User Deleted', 'The user has been permanently removed.')
-        pendingDeleteId.value = null
-    }
+// ── Polar Area ────────────────────────────────────────────────────────────
+const polarData = {
+    labels: ['Infrastructure', 'Security', 'Performance', 'Availability', 'Compliance', 'Support'],
+    datasets: [polarAreaDataset({ label: 'Resource Allocation', data: [72, 58, 89, 95, 63, 44] })]
 }
 
-const tableColumns: TableColumn<User>[] = [
-    {
-        accessorKey: 'name',
-        header: 'Name',
-        cell: ({ row }) => h('div', { class: 'flex items-center gap-2.5' }, [
-            h(UAvatar, {
-                src: row.original.avatar,
-                alt: row.original.name,
-                size: 'sm'
-            }),
-            h('span', { class: 'text-default font-semibold' }, row.original.name)
-        ])
-    },
-    {
-        accessorKey: 'role',
-        header: 'Role',
-        cell: ({ row }) => h('span', { class: '' }, row.original.role)
-    },
-    {
-        accessorKey: 'email',
-        header: 'Email',
-        cell: ({ row }) => h('span', { class: 'flex items-center gap-1' }, [
-            h(UIcon, { name: 'i-lucide-mail', class: 'w-3.5 h-3.5 shrink-0' }),
-            row.original.email
-        ])
-    },
-    {
-        accessorKey: 'id',
-        header: 'ID',
-        cell: ({ row }) => h(UBadge, {
-            label: row.original.id.slice(0, 8),
-            variant: 'soft',
-            color: 'neutral',
-            class: 'font-mono text-[11px]'
-        })
-    },
-    {
-        id: 'actions',
-        header: '',
-        meta: { class: { td: 'text-right' } },
-        cell: ({ row }) => {
-            const items: DropdownMenuItem[][] = [
-                [
-                    {
-                        label: 'Edit',
-                        icon: 'i-lucide-pencil',
-                        onSelect: () => openEditModal(row.original)
-                    }
-                ],
-                [
-                    {
-                        label: 'Delete',
-                        icon: 'i-lucide-trash',
-                        color: 'error',
-                        onSelect: () => promptDelete(row.original.id)
-                    }
-                ]
-            ]
-
-            return h(UDropdownMenu, {
-                items,
-                content: { align: 'end' },
-                size: 'sm'
-            }, {
-                default: () => h(UButton, {
-                    icon: 'i-lucide-ellipsis-vertical',
-                    color: 'neutral',
-                    variant: 'ghost',
-                    size: 'sm'
-                })
-            })
-        }
-    }
-]
-const table = useTemplateRef('table')
-const globalFilter = ref('')
-const columnVisibility = ref({
-    id: false
-})
-
-const viewMode = ref<'list' | 'card'>('list')
-const filteredUsers = computed(() => {
-    if (!globalFilter.value) return store.users
-    const search = globalFilter.value.toLowerCase()
-    return store.users.filter((user: User) =>
-        user.name.toLowerCase().includes(search) ||
-        user.email.toLowerCase().includes(search) ||
-        user.role.toLowerCase().includes(search) ||
-        user.id.toLowerCase().includes(search)
-    )
-})
+// ── Radar ─────────────────────────────────────────────────────────────────
+const radarData = {
+    labels: ['Performance', 'Reliability', 'Security', 'Scalability', 'Usability', 'Maintainability'],
+    datasets: [
+        radarDataset({ label: 'Current', data: [80, 92, 75, 68, 88, 72] }),
+        radarDataset({ label: 'Target', data: [90, 95, 90, 85, 92, 88], borderColor: palette.violet.solid, backgroundColor: palette.violet.soft }),
+    ]
+}
 </script>
 
 <template>
-    <PageHeading forTable title="Users" description="List of users in the system">
-        <div class="flex gap-2">
-            <TableGlobalFilter v-model="globalFilter" />
-            <TableColumnToggle v-if="viewMode === 'list'" :table="table" />
-            <UTabs v-model="viewMode" variant="pill" size="xs" :content="false" :items="[
-                { value: 'card', icon: 'i-lucide-grid-2x2' },
-                { value: 'list', icon: 'i-lucide-list' },
-            ]" />
-        </div>
-    </PageHeading>
-    <ClientOnly>
-        <UTable v-if="viewMode === 'list'" :data="store.users" :columns="tableColumns" :loading="store.isLoading"
-            v-model:column-visibility="columnVisibility" v-model:global-filter="globalFilter" sticky ref="table"
-            class="flex-1 scrollbar">
-            <template #empty>
-                <Empty :loading="store.isLoading" title="No users found"
-                    description="There are currently no users to display. Add a new user to get started."
-                    icon="i-lucide-user" loading-title="Loading Users"
-                    loading-description="Please wait while we fetch your users inventory.">
-                    <template #action>
-                        <UButton label="Add First User" icon="i-lucide-plus" color="primary" size="lg"
-                            @click="openCreateModal()" />
-                    </template>
-                </Empty>
-            </template>
-        </UTable>
-        <div v-else class="flex-1 overflow-y-auto scrollbar p-4">
-            <div v-if="filteredUsers.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <UCard v-for="user in filteredUsers" :key="user.id" variant="subtle"
-                    :ui="{ header: 'flex items-center justify-between gap-4', footer: 'p-0 sm:p-0' }" class="shadow-sm">
-                    <template #header>
-                        <div class="flex items-center gap-2">
-                            <UAvatar :src="user.avatar" :alt="user.name" size="lg" />
-                            <div class="text-sm font-bold truncate">{{ user.name }}</div>
-                        </div>
-                        <UDropdownMenu :items="[[
-                            { label: 'Edit', icon: 'i-lucide-edit', onSelect: () => openEditModal(user) }
-                        ], [
-                            { label: 'Delete', icon: 'i-lucide-trash', color: 'error', onSelect: () => promptDelete(user.id) }
-                        ]]" :content="{ align: 'end' }" size="sm">
-                            <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="sm" />
-                        </UDropdownMenu>
-                    </template>
-                    <div
-                        class="*:py-2 *:first:pt-0 *:last:pb-0 *:flex *:items-center *:justify-between text-sm divide-y divide-default">
-                        <div>
-                            <div class="text-muted w-full">ID</div>
-                            <UBadge :label="user.id.slice(0, 8)" variant="soft" color="neutral" />
-                        </div>
-                        <div>
-                            <div class="text-muted">Role</div>
-                            <span class="truncate">{{ user.role }}</span>
-                        </div>
-                        <div>
-                            <div class="text-muted w-full">Email</div>
-                            <div class="flex items-center justify-end gap-1 w-full overflow-hidden">
-                                <UIcon name="i-lucide-mail" class="w-3.5 h-3.5 shrink-0" />
-                                <span class="truncate">{{ user.email }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </UCard>
+    <UPageCard title="Dashboard" description="Key metrics and chart samples for easy reference." variant="naked"
+        orientation="horizontal" class="rounded-none" />
+
+    <!-- ── Stat Cards ────────────────────────────────────────────────── -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <StatCard title="Total Users" value="10,248" icon="i-lucide-users" trend="12% from last month" trendDirection="up" />
+        <StatCard title="Active Sessions" value="1,432" icon="i-lucide-activity" trend="5% from last week" trendDirection="up" />
+        <StatCard title="Avg. Response Time" value="245ms" icon="i-lucide-zap" trend="12ms from last month" trendDirection="down" />
+    </div>
+
+    <!-- ── Row 1: Line Charts ─────────────────────────────────────────── -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <UCard variant="subtle" class="shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-base font-semibold">Active Users Trend</h3>
+                    <p class="text-xs text-muted mt-0.5">Single-series line chart</p>
+                </div>
+                <UBadge variant="soft" color="primary">Weekly</UBadge>
             </div>
-            <Empty v-else :loading="store.isLoading" title="No users found"
-                description="There are currently no users to display. Add a new user to get started."
-                icon="i-lucide-user" loading-title="Loading Users"
-                loading-description="Please wait while we fetch your users inventory.">
-                <template #action>
-                    <UButton label="Add First User" icon="i-lucide-plus" color="primary" size="lg"
-                        @click="openCreateModal()" />
-                </template>
-            </Empty>
-
-        </div>
-    </ClientOnly>
-
-    <!-- Edit Save Confirmation Modal -->
-    <ConfirmationModal v-model:open="isEditConfirmOpen" title="Save changes?"
-        description="Are you sure you want to update this user's information?" confirm-label="Yes, Save"
-        confirm-color="warning" @confirm="confirmSave" />
-
-    <!-- Delete Confirmation Modal -->
-    <ConfirmationModal v-model:open="isDeleteConfirmOpen" title="Delete user?"
-        description="This will permanently remove the user. This action cannot be undone." confirm-label="Yes, Delete"
-        confirm-color="error" @confirm="confirmDelete" />
-
-    <UModal v-model:open="isOpen" :title="isEditing ? 'Modify Profile Details' : 'Register New Profile'">
-        <template #body>
-            <div class="space-y-4">
-                <UFormField label="Full Name" required>
-                    <UInput v-model="form.name" placeholder="John Doe" class="w-full" />
-                </UFormField>
-                <UFormField label="Job Assignment" required>
-                    <UInput v-model="form.role" placeholder="Systems Engineer" class="w-full" />
-                </UFormField>
-                <UFormField label="Electronic Mail" required>
-                    <UInput v-model="form.email" type="email" placeholder="john.doe@enterprise.io" class="w-full" />
-                </UFormField>
+            <div class="h-[240px] w-full">
+                <Line :data="activityData" :options="defaultOptions" />
             </div>
-        </template>
-
-        <template #footer>
-            <div class="flex justify-end gap-2">
-                <UButton variant="ghost" color="neutral" @click="isOpen = false">Dismiss</UButton>
-                <UButton color="primary" @click="handleSave">{{ isEditing ? 'Save Changes' : 'Save Record' }}</UButton>
+        </UCard>
+        <UCard variant="subtle" class="shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-base font-semibold">Revenue vs Expenses</h3>
+                    <p class="text-xs text-muted mt-0.5">Multi-series line chart</p>
+                </div>
+                <UBadge variant="soft" color="primary">6 Months</UBadge>
             </div>
-        </template>
-    </UModal>
+            <div class="h-[240px] w-full">
+                <Line :data="revenueData"
+                    :options="{ ...defaultOptions, plugins: { ...defaultOptions.plugins, legend: { display: true, labels: legendLabels } } }" />
+            </div>
+        </UCard>
+    </div>
+
+    <!-- ── Row 2: Bar Charts ──────────────────────────────────────────── -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <UCard variant="subtle" class="shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-base font-semibold">Activity by Category</h3>
+                    <p class="text-xs text-muted mt-0.5">Single-series bar chart</p>
+                </div>
+                <UBadge variant="soft" color="primary">All Time</UBadge>
+            </div>
+            <div class="h-[240px] w-full">
+                <Bar :data="completionData" :options="defaultOptions" />
+            </div>
+        </UCard>
+        <UCard variant="subtle" class="shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-base font-semibold">Quarterly Performance</h3>
+                    <p class="text-xs text-muted mt-0.5">Grouped bar chart</p>
+                </div>
+                <UBadge variant="soft" color="primary">YoY</UBadge>
+            </div>
+            <div class="h-[240px] w-full">
+                <Bar :data="groupedBarData"
+                    :options="{ ...defaultOptions, plugins: { ...defaultOptions.plugins, legend: { display: true, labels: legendLabels } } }" />
+            </div>
+        </UCard>
+    </div>
+
+    <!-- ── Row 3: Doughnut + Polar Area + Radar ──────────────────────── -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <UCard variant="subtle" class="shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-base font-semibold">Traffic Sources</h3>
+                    <p class="text-xs text-muted mt-0.5">Doughnut chart</p>
+                </div>
+                <UBadge variant="soft" color="primary">This Month</UBadge>
+            </div>
+            <div class="h-[240px] w-full">
+                <Doughnut :data="trafficData" :options="doughnutOptions" />
+            </div>
+        </UCard>
+        <UCard variant="subtle" class="shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-base font-semibold">Resource Allocation</h3>
+                    <p class="text-xs text-muted mt-0.5">Polar area chart</p>
+                </div>
+                <UBadge variant="soft" color="primary">Current Quarter</UBadge>
+            </div>
+            <div class="h-[240px] w-full">
+                <PolarArea :data="polarData" :options="polarAreaOptions" />
+            </div>
+        </UCard>
+        <UCard variant="subtle" class="shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-base font-semibold">System Health</h3>
+                    <p class="text-xs text-muted mt-0.5">Radar chart</p>
+                </div>
+                <UBadge variant="soft" color="primary">vs Target</UBadge>
+            </div>
+            <div class="h-[240px] w-full">
+                <Radar :data="radarData" :options="radarOptions" />
+            </div>
+        </UCard>
+    </div>
 </template>
