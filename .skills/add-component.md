@@ -21,7 +21,7 @@ Create a reusable Vue component in `app/components/`, following the project's es
 
 2. **Write the `<script setup lang="ts">` block** using this structure:
 
-   **Props only** (most common — e.g., `StatCard`, `PageHeading`, `Empty`):
+   **Props only** (most common — e.g., `StatCard`, `PageHeading`):
    ```ts
    <script setup lang="ts">
    import { computed } from 'vue'   // only if computed/watch is needed

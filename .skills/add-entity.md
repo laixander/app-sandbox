@@ -78,7 +78,7 @@ Create `app/pages/<entity>.vue`. Key requirements:
 - Use `TableGlobalFilter` + `TableColumnToggle` + `UTabs` in the `PageHeading` default slot
 - `viewMode` values: `'list'` | `'card'` (NOT `'table'`)
 - Table view: `<UTable>` with `sticky`, `ref="table"`, `v-model:column-visibility`, `v-model:global-filter`
-- Table empty state: `<Empty>` component in `#empty` slot
+- Table empty state: `<UEmpty variant="naked">` in `#empty` slot
 - Card view: `filtered<Entity>s` computed for search-aware rendering; `md:grid-cols-2 lg:grid-cols-4` grid
 - Card header: avatar + name on left, `UDropdownMenu` with `[[Edit], [Delete]]` on right
 - Card body: key-value rows with `divide-y divide-default`

@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { useUserStore } from '~/stores/userStore'
+import { useDashboardStore } from '~/stores/dashboardStore'
+import { useNotificationStore } from '~/stores/notificationStore'
+import { useKanbanStore } from '~/stores/kanbanStore'
 
 // ============================================================================
 // Composables & State
 // ============================================================================
 const store = useUserStore()
+const dashboardStore = useDashboardStore()
+const notificationStore = useNotificationStore()
+const kanbanStore = useKanbanStore()
 const toast = useAppToast()
 
-const isLoading = computed(() => store.isLoading)
-const isDataDeployed = computed(() => store.hasUsers)
+const isLoading = computed(() => store.isLoading || dashboardStore.isLoading)
+const isDataDeployed = computed(() =>
+    store.hasUsers || dashboardStore.hasDashboardData || notificationStore.hasNotifications || kanbanStore.hasData
+)
 
 // ============================================================================
 // Confirmation Modal
@@ -24,8 +32,11 @@ const isResetConfirmOpen = ref(false)
  */
 const handleSeed = async () => {
     try {
-        await store.deployMockData(9)
-        toast.success('Data Deployed', '9 users have been seeded into the system.')
+        store.deployMockData(9)
+        dashboardStore.deployMockData()
+        notificationStore.deployMockData()
+        kanbanStore.deployMockData()
+        toast.success('Data Deployed', 'Demo data has been seeded into the system.')
     } catch {
         toast.error('Seed Failed', 'Could not deploy demo data.')
     }
@@ -44,7 +55,10 @@ const promptReset = () => {
 const handleReset = () => {
     try {
         store.removeMockData()
-        toast.success('System Reset', 'All user data has been cleared.')
+        dashboardStore.removeMockData()
+        notificationStore.removeMockData()
+        kanbanStore.removeMockData()
+        toast.success('System Reset', 'All demo data has been cleared.')
     } catch {
         toast.error('Reset Failed', 'Could not clear the data.')
     }

@@ -7,17 +7,22 @@ defineProps<{
 
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
-// const authStore = useDemoAuth()
 const router = useRouter()
-
+const { currentUser, isAdmin, logout } = useDemoAuth()
 
 const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone', 'taupe', 'mauve', 'mist', 'olive']
 
+// Generate a stable avatar seed from the user's name
+const avatarSeed = computed(() => currentUser.value?.name.replace(' ', '') ?? 'Guest')
+
 const items = computed<DropdownMenuItem[][]>(() => [
-    // Header Info
-    // Role Switcher
-    // Show All Page
+    // Settings shortcut
+    [{
+        label: 'Settings',
+        icon: 'i-lucide-settings',
+        onSelect: () => router.push('/settings')
+    }],
     // Theme options
     [{
         label: 'Theme Color',
@@ -85,9 +90,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
     [{
         label: 'Log out',
         icon: 'i-lucide-log-out',
-        onSelect: () => {
-            router.push('/')
-        }
+        onSelect: () => logout()
     }]
 ])
 </script>
@@ -99,11 +102,18 @@ const items = computed<DropdownMenuItem[][]>(() => [
         <UButton color="neutral" variant="ghost" :square="collapsed"
             class="data-[state=open]:bg-elevated/50 py-2.5 w-full">
             <template #leading>
-                <UAvatar src="https://api.dicebear.com/10.x/thumbs/svg?seed=Felix" alt="John Doe" size="xs" />
+                <UAvatar :src="`https://api.dicebear.com/10.x/thumbs/svg?seed=${avatarSeed}`"
+                    :alt="currentUser?.name ?? 'User'" size="xs" />
             </template>
-            <span v-if="!collapsed" class="flex-1 text-left">John Doe</span>
-            <template #trailing v-if="!collapsed">
-                <UIcon name="i-lucide-chevrons-up-down" class="size-5" />
+            <span v-if="!collapsed" class="flex-1 text-left truncate">{{ currentUser?.name ?? 'Guest' }}</span>
+            <template v-if="!collapsed" #trailing>
+                <UBadge
+                    :label="currentUser?.role ?? ''"
+                    :color="isAdmin ? 'primary' : 'neutral'"
+                    variant="soft"
+                    size="sm"
+                    class="shrink-0"
+                />
             </template>
         </UButton>
 

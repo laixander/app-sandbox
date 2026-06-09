@@ -4,60 +4,39 @@
  * Component: StatusBadge
  * ============================================================================
  * A reusable UI component that standardizes color-coding for all system statuses.
- * It maps PMS business statuses (e.g., 'Pending', 'In-House', 'Dirty') to Nuxt UI 
- * badge colors to ensure visual consistency across the entire application.
+ * Maps known status strings to Nuxt UI badge colors via a central colorMap to
+ * ensure visual consistency across the entire application.
+ *
+ * Props:
+ *   status  — The status string to display and color-code (required)
+ *   icon    — Optional Lucide icon name to show inside the badge
+ *             (e.g. 'i-lucide-check-circle'). Falls back to no icon if omitted.
  */
 import { computed } from 'vue'
 
 const props = defineProps<{
     status: string
+    icon?: string
 }>()
 
-// We strictly type BadgeColor to match the allowed literal strings in Nuxt UI's <UBadge>.
-// This prevents TypeScript errors when passing the computed color to the component.
-
-type BadgeColor = 'success' | 'info' | 'error' | 'neutral' | 'primary' | 'secondary' | 'warning'
+// BadgeColor must stay in sync with ui.theme.colors in nuxt.config.ts.
+// Adding a color there without adding it here will cause a TypeScript error.
+type BadgeColor =
+    | 'primary' | 'secondary' | 'tertiary' | 'info' | 'success' | 'warning' | 'error' | 'neutral'
+    | 'red' | 'orange' | 'amber' | 'yellow' | 'lime' | 'green' | 'emerald' | 'teal'
+    | 'cyan' | 'sky' | 'blue' | 'indigo' | 'violet' | 'purple' | 'fuchsia' | 'pink' | 'rose'
 
 const colorMap: Record<string, BadgeColor> = {
-    'Pending': 'warning',
-    'Confirmed': 'primary',
-    'In-House': 'success',
-    'Done': 'neutral',
-    'Cancelled': 'error',
-    // Occupancy
-    'Vacant': 'success',
-    'Occupied': 'primary',
-    // Clean
-    'Clean': 'success',
-    'Dirty': 'error',
-    'Pickup': 'warning',
-    'Inspected': 'success',
-    // Condition
-    'Normal': 'success',
-    'Maintenance': 'error',
-    // Folio
-    'Open': 'warning',
-    'Closed': 'primary',
-    'Settled': 'success',
-    // Room Types
-    'Standard': 'neutral',
-    'Deluxe': 'primary',
-    'Family': 'info',
-    'Executive Suite': 'warning',
-    // Users & Roles
-    'Administrator': 'primary',
-    'Front Desk': 'info',
-    'Billing': 'warning',
-    'Housekeeping': 'secondary',
-    'Active': 'success',
+    // User entity status
+    'Active':   'success',
     'Inactive': 'error',
     // Fallback
-    'default': 'neutral'
+    'default': 'neutral',
 }
 
-const badgeColor = computed(() => colorMap[props.status] || colorMap['default'])
+const badgeColor = computed(() => colorMap[props.status] ?? colorMap['default'])
 </script>
 
 <template>
-    <UBadge :label="status" :color="badgeColor" variant="subtle" size="sm" />
+    <UBadge :label="status" :color="badgeColor" variant="subtle" size="sm" :icon="icon" />
 </template>

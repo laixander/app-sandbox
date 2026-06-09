@@ -28,6 +28,17 @@ export const useAppToast = () => {
                 color: 'error',
                 icon: 'i-lucide-x-circle'
             })
+        },
+        /**
+         * Display a warning notification
+         */
+        warning: (title: string, description?: string) => {
+            toast.add({
+                title,
+                description,
+                color: 'warning',
+                icon: 'i-lucide-triangle-alert'
+            })
         }
     }
 }

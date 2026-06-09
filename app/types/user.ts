@@ -4,4 +4,5 @@ export interface User {
   email: string
   avatar: string
   role: string
+  status: 'Active' | 'Inactive'
 }

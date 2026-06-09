@@ -11,7 +11,7 @@ const { title, description, forTable } = defineProps<Props>()
 <template>
     <div class="flex items-center justify-between" :class="forTable ? 'p-4 border-b border-default' : ''">
         <div class="flex-1">
-            <div class="text-2xl font-bold">
+            <div class="text-xl font-bold">
                 <slot name="title">
                     {{ title }}
                 </slot>

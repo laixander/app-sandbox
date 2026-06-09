@@ -39,6 +39,9 @@ Create a new auto-imported composable in `app/composables/`, following the `useA
            },
            error: (title: string, description?: string) => {
                toast.add({ title, description, color: 'error', icon: 'i-lucide-x-circle' })
+           },
+           warning: (title: string, description?: string) => {
+               toast.add({ title, description, color: 'warning', icon: 'i-lucide-triangle-alert' })
            }
        }
    }
@@ -73,6 +76,43 @@ Create a new auto-imported composable in `app/composables/`, following the `useA
    }
    ```
 
+   **Pattern D: Thin ergonomic wrapper over a store action** (like `useActivityLog`):
+   This is the preferred pattern for cross-cutting concerns used on many pages (e.g. audit logging).
+   The composable hides the store import and provides a clean typed API:
+   ```ts
+   // app/composables/useActivityLog.ts
+   import type { ActivityLogAction } from '~/types/activityLog'
+   import { useActivityLogStore } from '~/stores/activityLogStore'
+
+   export const useActivityLog = () => {
+       const store = useActivityLogStore()
+
+       /**
+        * Log a real user-initiated action.
+        * Do NOT call from seeders or mock-data operations.
+        */
+       const log = (
+           module: string,
+           action: ActivityLogAction,
+           description: string,
+           options?: { actor?: string; meta?: Record<string, unknown> }
+       ) => {
+           store.addLog(module, action, description, options)
+       }
+
+       return { log }
+   }
+   ```
+   Usage in a page:
+   ```ts
+   const { log } = useActivityLog()
+   // After a successful create:
+   log('Users', 'created', `Created user "${name}"`, { meta: { id: newUser.id } })
+   // After a successful delete:
+   log('Users', 'deleted', `Deleted user "${name}"`, { meta: { id: userId } })
+   ```
+   ```
+
 4. **Add JSDoc comments** above each exported function and return value for IDE discoverability:
    ```ts
    /**
@@ -89,7 +129,11 @@ Create a new auto-imported composable in `app/composables/`, following the `useA
            /**
             * Display an error notification
             */
-           error: (title: string, description?: string) => { ... }
+           error: (title: string, description?: string) => { ... },
+           /**
+            * Display a warning notification
+            */
+           warning: (title: string, description?: string) => { ... }
        }
    }
    ```

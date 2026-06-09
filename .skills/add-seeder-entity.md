@@ -55,7 +55,7 @@ Extend `app/utils/seeder.ts` with generator methods for a new entity and re-expo
    | Full name        | `faker.person.fullName()`                                 |
    | Job title        | `faker.person.jobTitle()`                                 |
    | Email            | `faker.internet.email()`                                  |
-   | Avatar image     | `faker.image.personPortrait()`                            |
+   | Avatar image     | `` `https://api.dicebear.com/10.x/thumbs/svg?seed=${encodeURIComponent(faker.person.fullName())}` `` |
    | Product name     | `faker.commerce.productName()`                            |
    | Price            | `parseFloat(faker.commerce.price())`                      |
    | URL / image      | `faker.image.url()`                                       |
